@@ -16,6 +16,7 @@ class vec3d:
     def __add__(self, other):
         return vec3d(self.x + other.x, self.y + other.y, self.z + other.z)
 
-    __sub__ = __add__
-
     __mul__ = dot
+
+    def __abs__(self):
+        return (self.x**2 + self.y**2 + self.z**2)**0.5

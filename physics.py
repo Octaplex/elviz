@@ -1,4 +1,7 @@
-from visual import *
+import math
+
+#constants
+muNot = 4*math.pi*10**-7
 
 class Inducer: pass
 
@@ -12,8 +15,16 @@ class Wire(BInducer):
         self.B = B
         self.I = I
 
-    def bfield_strength(x, y, z):
+    def bfield_strength(self, x, y, z):
         C = vec3d(x, y, z)
+
+        t = (self.A - self.C)*(self.B - self.A) / abs(self.B - self.A)**2
+        d = vec3d((self.A.x-C.x) - (self.B.x-C.x),
+                  (self.A.y-C.y) - (self.B.y-C.y),
+                  (self.A.z-C.z) - (self.B.z-C.z))
+        direction = ((self.B-self.A) * I).cross(d) / abs(((self.B-self.A) * I).cross(d))
+        magnitude = muNot*self.I / (2*math.pi*abs(d))
+        return magnitude*direction
 
     def bfield_draw(self, x, y, z):
         B = self.bfield_strength(x, y, z)
