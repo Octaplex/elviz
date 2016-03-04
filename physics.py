@@ -1,3 +1,5 @@
+from visual import *
+
 class Inducer: pass
 
 class BInducer:
@@ -12,7 +14,10 @@ class Wire(BInducer):
 
     def bfield_strength(x, y, z):
         C = vec3d(x, y, z)
-        # TODO calculations
+
+    def bfield_draw(self, x, y, z):
+        B = self.bfield_strength(x, y, z)
+        arrow(pos=(x,y,z), axis=tuple(B))
 
 class Field:
     def __call__(self, x, y, z): raise NotImplementedError
