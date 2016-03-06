@@ -36,9 +36,9 @@ class Wire(BInducer):
 class Coil(BInducer):
 
     def __init__(self, center, radius, norm, I):
-        self.center = vec3d(center)
+        self.center = center
         self.radius = radius
-        self.norm = vec3d(norm)
+        self.norm = norm
         self.I = I
 
     #rotation matrices for this coil, rotating so norm becomes z axis
@@ -93,15 +93,20 @@ class Coil(BInducer):
         C = muNot*I/math.pi
 
         #component calculations
-        Bx = (C*x*z / (2*alphaSq*(betaSq**0.5)*rhoSq)) * \
+        Bx = (C*newX*newZ / (2*alphaSq*(betaSq**0.5)*rhoSq)) * \
              ((radius**2 + r**2) * E(kSq) - alphaSq * K(kSq))
-        By = Bx * (y/x)
+        By = Bx * (newY/newX)
         Bz = (C/(2*alphaSq*(betaSq**0.5))) * \
              ((radius**2 + r**2) * E(kSq) - alphaSq * K(kSq))
 
-        #rotating field components back
+        #rotating field components to original rotate state
         finalB = np.dot(antiRotate, np.matrix([[Bx], [By], [Bz]]))
         return vec3d(finalB[0], finalB[1], finalB[2])
+
+
+    def bfield_draw(self, x, y, z):
+        B = self.bfield_strength(x, y, z)
+        arrow(pos=(x,y,z), axis=tuple(B))
         
         
 
