@@ -20,3 +20,9 @@ class vec3d:
 
     def __abs__(self):
         return (self.x**2 + self.y**2 + self.z**2)**0.5
+
+    def scalarMultiply(self, number):
+        return vec3d(self.x*number, self.y*number, self.z*number)
+
+    def normalize(self):
+        return vec3d(self.x/abs(self), self.y/abs(self), self.z/abs(self))
