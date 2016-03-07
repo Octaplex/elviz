@@ -41,9 +41,37 @@ class Field:
         """Add an inducer to this field."""
         self.ducs += [duc]
 
-    def draw(self, P):
+    def draw_at(self, P):
         """Draw the field vector at the given point."""
-        v = self(P)
+
+        # draw a skinny arrow
+        arrow(pos = tuple(P), axis = tuple(P + self(P)), shaftwidth = 0.1)
+
+    def draw(self, origin, size, step):
+        """
+        Draw field vectors periodically within a region.
+
+        Drawing begins at the origin and continues by the given step up to
+        and including the size. Both the size and step may be vectors or
+        scalars. Scalars are equivalent to vectors with equal dimensions.
+        """
+
+        x0, y0, z0 = origin
+
+        try:
+            l, w, h = size
+        except TypeError:
+            l = w = h = size
+
+        try:
+            step_x, step_y, step_z = step
+        except TypeError:
+            step_x = step_y = step_z = step
+
+        for x in range(x0, l, step_x):
+            for y in range(y0, h, step_y):
+                for z in range(z0, w, step_z):
+                    self.draw_at((x, y, z))
 
     def __call__(self, P): raise NotImplementedError
 
