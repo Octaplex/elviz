@@ -19,7 +19,7 @@ class Wire(BInducer):
     positive, and from B to A if it is negative.
     """
 
-    def __init__(self, A, B, I):
+    def __init__(self, A, B, I, radius=1):
         # coordinates
         self.A = A
         self.B = B
@@ -30,6 +30,9 @@ class Wire(BInducer):
         # length
         self.BA = B - A
         self.l = norm(B - A)
+
+        # the rod
+        self.rod = cylinder(pos=tuple(A), axis=tuple(B - A), radius=radius)
 
 
     def bfield_at(self, P):
