@@ -1,3 +1,5 @@
+from __future__ import division, print_function
+
 from math import *
 
 import numpy as np

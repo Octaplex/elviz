@@ -1,3 +1,5 @@
+from __future__ import division, print_function
+
 class Inducer:
     """
     The abstract base class for all field inducers.
