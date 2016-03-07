@@ -41,16 +41,16 @@ class Field:
         """Add an inducer to this field."""
         self.ducs += [duc]
 
-    def draw(self, x, y, z):
+    def draw(self, P):
         """Draw the field vector at the given point."""
-        v = self(x, y, z)
+        v = self(P)
 
-    def __call__(self, x, y, z): raise NotImplementedError
+    def __call__(self, P): raise NotImplementedError
 
 class BField(Field):
     """
     A magnetic (B) field.
     """
 
-    def __call__(self, x, y, z):
-        return sum(duc.bfield_at(x, y, z) for duc in self.ducs)
+    def __call__(self, P):
+        return sum(duc.bfield_at(P) for duc in self.ducs)
