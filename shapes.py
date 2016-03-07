@@ -4,9 +4,11 @@ import numpy as np
 import scipy as sp
 
 from scipy import integrate
+from numpy import dot, cross
 from numpy.linalg import norm
 
 from constants import mu_0
+from util import normalize
 
 class Wire(BInducer):
     """
@@ -18,21 +20,38 @@ class Wire(BInducer):
     """
 
     def __init__(self, A, B, I):
+        # coordinates
         self.A = A
         self.B = B
+
+        # current
         self.I = I
 
-    def bfield_at(self, P):
-        t = dot(self.A - P, self.B - self.A) / norm(self.B - self.A)**2
-        d = np.array(
-                (self.A[0] - P[0]) - (self.B[0] - P[0]),
-                (self.A[1] - P[1]) - (self.B[1] - P[1]),
-                (self.A[2] - P[2]) - (self.B[2] - P[2])
-                )
+        # length
+        self.BA = B - A
+        self.l = norm(B - A)
 
-        direction = normalize(((self.B-self.A) * I).cross(d))
-        magnitude = mu_0*self.I / (2*math.pi*abs(d))
-        return vec3d(direction.x*magnitude, direction.y*magnitude, direction.z*magnitude)
+
+    def bfield_at(self, P):
+        # compute the shortest distance d from the wire to point P
+        # V is the closest point on the wire to point P (needed to calculate
+        # the direction of the field, see below)
+        #
+        # adapted from
+        # http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
+        t = -dot(self.A - P, self.BA) / self.l**2
+        V = self.A + t*self.BA
+        r = P - V
+        d = norm(r)
+
+        # the magnitude of the field
+        mag = mu_0 * self.I / (2*pi*d)
+
+        # normalized (unit) vector in the direction of the field
+        hat = normalize(cross(r, V))
+
+        # return field vector
+        return mag*hat
 
 
 class Coil(BInducer):
