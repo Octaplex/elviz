@@ -7,7 +7,7 @@ import scipy as sp
 
 from scipy import integrate
 from numpy import dot, cross
-from numpy.linalg import norm
+from numpy.linalg import norm, inv
 
 from constants import mu_0
 from util import normalize
@@ -71,7 +71,7 @@ class Coil(BInducer):
         self.I = I
         # rotation matrices for this coil, rotating so norm becomes z axis
         rotate = find_rotmatrix(normal, vec3d(0, 0, 1))
-        antiRotate = find_rotmatrix(vec3d(0, 0, 1), normal)
+        antiRotate = inv(rotate)
 
 
 
@@ -132,3 +132,6 @@ class Coil(BInducer):
         finalB = np.dot(antiRotate, np.matrix([[Bx], [By], [Bz]]))
         return vec3d(finalB[0], finalB[1], finalB[2])
 
+
+#class Solenoid: rectangular prism of coils
+ 
