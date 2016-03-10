@@ -70,7 +70,9 @@ class Wire(BInducer):
                 )
 
         direction = norm(self.I.cross(d))
-        magnitude = mu_0*mag(self.I) / (2*math.pi*abs(d))
+        magnitude = 1
+        #mu_0*mag(self.I) / (2*math.pi*abs(d))
+        print(magnitude)
         return direction*magnitude
 
 
