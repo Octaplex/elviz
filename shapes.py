@@ -27,13 +27,13 @@ class Wire(BInducer):
         self.A = A
         self.B = B
 
-        # current
-        self.I = I
-
         # length
         self.BA = self.B - self.A
         self.l = self.BA.mag
         self.l2 = self.BA.mag2
+
+        # current
+        self.I = norm(self.BA) * I
 
         # the rod
         self.rod = cylinder(pos = self.A, axis = self.BA, radius=radius)
@@ -47,20 +47,31 @@ class Wire(BInducer):
         # adapted from
         # http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
 
-        t = -dot(self.A - P, self.BA) / self.l2
-        V = self.A + t*self.BA
-        r = P - V
-        d = mag(r)
 
-        # the magnitude of the field
-        Bmag = mu_0 * self.I / (2*pi*d)
+##        t = -dot(self.A - P, self.BA) / self.l2
+##        V = self.A + t*self.BA
+##        r = P - V
+##        d = mag(r)
+##
+##        # the magnitude of the field
+##        Bmag = mu_0 * self.I / (2*pi*d)
+##
+##        # normalized (unit) vector in the direction of the field
+##        Bhat = norm(cross(r, V))
+##
+##        # return field vector
+##        return Bmag*Bhat
 
-        # normalized (unit) vector in the direction of the field
-        Bhat = norm(cross(r, V))
+        t = dot(self.A - P, self.B - self.A) / mag(self.B - self.A)**2
+        d = vector(
+                (self.A[0] - P[0]) - (self.B[0] - P[0]),
+                (self.A[1] - P[1]) - (self.B[1] - P[1]),
+                (self.A[2] - P[2]) - (self.B[2] - P[2])
+                )
 
-        # return field vector
-        return Bhat
-        return Bmag*Bhat
+        direction = norm(self.I.cross(d))
+        magnitude = mu_0*mag(self.I) / (2*math.pi*abs(d))
+        return direction*magnitude
 
 
 class Coil(BInducer):
