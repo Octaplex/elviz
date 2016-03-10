@@ -1,5 +1,7 @@
 from __future__ import division, print_function
 
+from visual import *
+
 class Inducer:
     """
     The abstract base class for all field inducers.
@@ -47,7 +49,7 @@ class Field:
         """Draw the field vector at the given point."""
 
         # draw a skinny arrow
-        arrow(pos = tuple(P), axis = tuple(P + self(P)), shaftwidth = 0.1)
+        arrow(pos = P, axis = P + self(P), shaftwidth = 0.1)
 
     def draw(self, origin, size, step):
         """
@@ -70,10 +72,10 @@ class Field:
         except TypeError:
             step_x = step_y = step_z = step
 
-        for x in range(x0, l, step_x):
-            for y in range(y0, h, step_y):
-                for z in range(z0, w, step_z):
-                    self.draw_at((x, y, z))
+        for x in range(int(x0), int(l), int(step_x)):
+            for y in range(int(y0), int(h), int(step_y)):
+                for z in range(int(z0), int(w), int(step_z)):
+                    self.draw_at(vector(x, y, z))
 
     def __call__(self, P): raise NotImplementedError
 
@@ -83,4 +85,8 @@ class BField(Field):
     """
 
     def __call__(self, P):
-        return sum(duc.bfield_at(P) for duc in self.ducs)
+        tot = vector(0, 0, 0)
+        for duc in self.ducs:
+            tot += duc.bfield_at(P)
+
+        return tot

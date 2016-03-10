@@ -1,16 +1,17 @@
 from __future__ import division, print_function
 
+from visual import *
+
 from math import *
 
 import numpy as np
 import scipy as sp
+import numpy.linalg as la
 
 from scipy import integrate
-from numpy import dot, cross
-from numpy.linalg import norm
 
+from physics import *
 from constants import mu_0
-from util import normalize
 
 class Wire(BInducer):
     """
@@ -21,7 +22,7 @@ class Wire(BInducer):
     positive, and from B to A if it is negative.
     """
 
-    def __init__(self, A, B, I, radius=1):
+    def __init__(self, A, B, I, radius=0.1):
         # coordinates
         self.A = A
         self.B = B
@@ -30,11 +31,12 @@ class Wire(BInducer):
         self.I = I
 
         # length
-        self.BA = B - A
-        self.l = norm(B - A)
+        self.BA = self.B - self.A
+        self.l = self.BA.mag
+        self.l2 = self.BA.mag2
 
         # the rod
-        self.rod = cylinder(pos=tuple(A), axis=tuple(B - A), radius=radius)
+        self.rod = cylinder(pos = self.A, axis = self.BA, radius=radius)
 
 
     def bfield_at(self, P):
@@ -44,19 +46,21 @@ class Wire(BInducer):
         #
         # adapted from
         # http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
-        t = -dot(self.A - P, self.BA) / self.l**2
+
+        t = -dot(self.A - P, self.BA) / self.l2
         V = self.A + t*self.BA
         r = P - V
-        d = norm(r)
+        d = mag(r)
 
         # the magnitude of the field
-        mag = mu_0 * self.I / (2*pi*d)
+        Bmag = mu_0 * self.I / (2*pi*d)
 
         # normalized (unit) vector in the direction of the field
-        hat = normalize(cross(r, V))
+        Bhat = norm(cross(r, V))
 
         # return field vector
-        return mag*hat
+        return Bhat
+        return Bmag*Bhat
 
 
 class Coil(BInducer):
@@ -70,9 +74,9 @@ class Coil(BInducer):
         self.norm = norm
         self.I = I
 
-    # rotation matrices for this coil, rotating so norm becomes z axis
-    rotate = find_rotmatrix(norm, vec3d(0, 0, 1))
-    antiRotate = find_rotmatrix(vec3d(0, 0, 1), norm)
+        # rotation matrices for this coil, rotating so norm becomes z axis
+        rotate = find_rotmatrix(norm, vec3d(0, 0, 1))
+        antiRotate = find_rotmatrix(vec3d(0, 0, 1), norm)
 
     # 1st and 2nd kind of elliptic integrals, K(k) and E(k) respectively
     # http://www.mhtlab.uwaterloo.ca/courses/me755/web_chap3.pdf
