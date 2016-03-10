@@ -68,15 +68,15 @@ class Coil(BInducer):
     A coil of wire.
     """
 
-    def __init__(self, center, radius, norm, I):
+    def __init__(self, center, radius, normal, I):
         self.center = center
         self.radius = radius
-        self.norm = norm
+        self.normal = normal
         self.I = I
-
         # rotation matrices for this coil, rotating so norm becomes z axis
-        rotate = find_rotmatrix(norm, vec3d(0, 0, 1))
-        antiRotate = find_rotmatrix(vec3d(0, 0, 1), norm)
+        rotate = find_rotmatrix(normal, vec3d(0, 0, 1))
+        antiRotate = inv(rotate)
+
 
     # 1st and 2nd kind of elliptic integrals, K(k) and E(k) respectively
     # http://www.mhtlab.uwaterloo.ca/courses/me755/web_chap3.pdf
@@ -135,3 +135,6 @@ class Coil(BInducer):
         finalB = np.dot(antiRotate, np.matrix([[Bx], [By], [Bz]]))
         return vec3d(finalB[0], finalB[1], finalB[2])
 
+
+#class Solenoid: rectangular prism of coils
+ 
