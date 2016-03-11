@@ -26,7 +26,7 @@ class Wire(BInducer):
         # coordinates
         self.A = A
         self.B = B
-
+        
         # length
         self.BA = self.B - self.A
         self.l = self.BA.mag
@@ -64,16 +64,18 @@ class Wire(BInducer):
 
         t = dot(self.A - P, self.B - self.A) / mag(self.B - self.A)**2
         d = vector(
-                (self.A[0] - P[0]) - (self.B[0] - P[0]),
-                (self.A[1] - P[1]) - (self.B[1] - P[1]),
-                (self.A[2] - P[2]) - (self.B[2] - P[2])
+                (self.A[0] - P[0]) - (self.B[0] - self.A[0])*t,
+                (self.A[1] - P[1]) - (self.B[1] - self.A[1])*t,
+                (self.A[2] - P[2]) - (self.B[2] - self.A[2])*t
                 )
-
         direction = norm(self.I.cross(d))
-        magnitude = 1
-        #mu_0*mag(self.I) / (2*math.pi*abs(d))
-        print(magnitude)
-        return direction*magnitude
+        num = mu_0*mag(self.I)
+        denom = (2*math.pi*abs(d))
+        if denom == 0:
+            return direction*0
+        else:
+            magnitude = num/denom
+            return direction*magnitude
 
 
 class Coil(BInducer):
