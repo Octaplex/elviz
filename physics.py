@@ -43,6 +43,7 @@ class Field:
     def __init__(self, ducs = [], color = color.green):
         self.ducs = ducs
         self.color = color
+        self.Ps = {}
 
     def add_inducer(self, duc):
         """Add an inducer to this field."""
@@ -51,10 +52,11 @@ class Field:
     def draw_at(self, P):
         """Draw the field vector at the given point."""
 
-        mag, hat = self(P)
+        mag, hat = self[P]
 
-        val = mag/2.5
-        arrow(pos = P, axis = hat, shaftwidth = 0.1, color = interpolate(self.color, val))
+        val = mag/self.max_mag
+        arrow(pos = P, axis = 2*val*hat, shaftwidth = 0.1,
+                color = interpolate(self.color, val), opacity = 2*val)
 
     def draw(self, origin, size, step):
         """
@@ -77,10 +79,32 @@ class Field:
         except TypeError:
             step_x = step_y = step_z = step
 
-        for x in range(int(x0), int(l)+1, int(step_x)):
-            for y in range(int(y0), int(h)+1, int(step_y)):
-                for z in range(int(z0), int(w)+1, int(step_z)):
+        xs = range(int(x0), int(l)+1, int(step_x))
+        ys = range(int(y0), int(h)+1, int(step_y))
+        zs = range(int(z0), int(w)+1, int(step_z))
+
+        for x in xs:
+            for y in ys:
+                for z in zs:
+                    self[vector(x, y, z)] = self(vector(x, y, z))
+
+        self.max_mag = max(mag for mag, hat in self.Ps.values())
+
+        for x in xs:
+            for y in ys:
+                for z in zs:
                     self.draw_at(vector(x, y, z))
+
+    def __getitem__(self, P):
+        if P in self.Ps:
+            return self.Ps[P]
+        else:
+            B = self(P)
+            self.Ps[P] = B
+            return B
+
+    def __setitem__(self, P, B):
+        self.Ps[P] = B
 
     def __call__(self, P): raise NotImplementedError
 
