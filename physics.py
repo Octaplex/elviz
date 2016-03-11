@@ -2,6 +2,8 @@ from __future__ import division, print_function
 
 from visual import *
 
+from util import interpolate
+
 class Inducer:
     """
     The abstract base class for all field inducers.
@@ -38,8 +40,9 @@ class Field:
     Fields maintain a list of inducers called ducs.
     """
 
-    def __init__(self):
-        self.ducs = []
+    def __init__(self, ducs = [], color = color.green):
+        self.ducs = ducs
+        self.color = color
 
     def add_inducer(self, duc):
         """Add an inducer to this field."""
@@ -48,8 +51,10 @@ class Field:
     def draw_at(self, P):
         """Draw the field vector at the given point."""
 
-        # draw a skinny arrow
-        arrow(pos = P, axis = P + self(P), shaftwidth = 0.1)
+        mag, hat = self(P)
+
+        val = mag/2.5
+        arrow(pos = P, axis = hat, shaftwidth = 0.1, color = interpolate(self.color, val))
 
     def draw(self, origin, size, step):
         """
@@ -72,9 +77,9 @@ class Field:
         except TypeError:
             step_x = step_y = step_z = step
 
-        for x in range(int(x0), int(l), int(step_x)):
-            for y in range(int(y0), int(h), int(step_y)):
-                for z in range(int(z0), int(w), int(step_z)):
+        for x in range(int(x0), int(l)+1, int(step_x)):
+            for y in range(int(y0), int(h)+1, int(step_y)):
+                for z in range(int(z0), int(w)+1, int(step_z)):
                     self.draw_at(vector(x, y, z))
 
     def __call__(self, P): raise NotImplementedError
@@ -85,8 +90,12 @@ class BField(Field):
     """
 
     def __call__(self, P):
-        tot = vector(0, 0, 0)
+        mag = 0
+        hat = vector(0, 0, 0)
         for duc in self.ducs:
-            tot += duc.bfield_at(P)
+            m, h = duc.bfield_at(P)
 
-        return tot
+            mag += m
+            hat += h
+
+        return mag, hat
