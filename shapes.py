@@ -69,8 +69,10 @@ class Coil(BInducer):
         self.normal = normal
         self.I = I
         # rotation matrices for this coil, rotating so norm becomes z axis
-        rotate = find_rotmatrix(normal, vec3d(0, 0, 1))
+        rotate = self.find_rotmatrix(normal, vector(0, 0, 1))
         antiRotate = inv(rotate)
+
+        ring(pos = center, axis = normal, radius = radius, thickness = 0.1)
 
 
     # 1st and 2nd kind of elliptic integrals, K(k) and E(k) respectively
@@ -81,11 +83,11 @@ class Coil(BInducer):
     def E(k):
         return integrate.quad(lambda t: ((1-k**2*t**2)/(1-t**2))**0.5, 0, 1)[0]
 
-    def find_rotmatrix(a, b):
+    def find_rotmatrix(self, a, b):
         # http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
-        a, b = normalize(a), normalize(b)
+        a, b = norm(a), norm(b)
         v = cross(a, b)
-        s = abs(v) #sin of angle
+        s = v.mag #sin of angle
         c = a*b #cos of angle
 
         #creating [v]x, skew symmetric matrix
@@ -109,7 +111,7 @@ class Coil(BInducer):
 
         #defining variables for equation
         #http://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20010038494.pdf
-        r = abs(vec3d(newX, newY, newZ)) #spherical coordinate equivalent of magnitude
+        r = mag(vector(newX, newY, newZ)) #spherical coordinate equivalent of magnitude
 
         rhoSq = newX**2 + newY**2
         rSq = newX**2 + newY**2 + newZ**2
@@ -128,7 +130,7 @@ class Coil(BInducer):
 
         #rotating field components to original rotate state
         finalB = np.dot(antiRotate, np.matrix([[Bx], [By], [Bz]]))
-        return vec3d(finalB[0], finalB[1], finalB[2])
+        return vector(finalB[0], finalB[1], finalB[2])
 
 
 #class Solenoid: rectangular prism of coils
