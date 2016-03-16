@@ -28,6 +28,19 @@ class BInducer:
         raise NotImplementedError
 
 
+class EInducer:
+    """
+    An electric (E) field inducer.
+
+    Like inducer, this class is more or less a placeholder. It does define the
+    method efield_strength which must be implemented by all subclasses.
+    """
+
+    def efield_at(self, P):
+        """Calculate the electric field vector at a point."""
+        raise NotImplementedError
+
+
 class Field:
     """
     The abstract base class for all fields.
@@ -52,10 +65,10 @@ class Field:
     def draw_at(self, P):
         """Draw the field vector at the given point."""
 
-        mag, hat = self[P]
+        B = self[P]
 
-        val = mag/self.max_mag
-        arrow(pos = P, axis = 2*val*hat, shaftwidth = 0.1,
+        val = B.mag/self.max_mag
+        arrow(pos = P, axis = 1.5*val*B.norm(), shaftwidth = 0.1,
                 color = interpolate(self.color, val), opacity = 2*val)
 
     def draw(self, origin, size, step):
@@ -67,6 +80,7 @@ class Field:
         scalars. Scalars are equivalent to vectors with equal dimensions.
         """
 
+        # get the origin coordinates
         x0, y0, z0 = origin
 
         try:
@@ -79,21 +93,22 @@ class Field:
         except TypeError:
             step_x = step_y = step_z = step
 
-        xs = range(int(x0), int(l)+1, int(step_x))
-        ys = range(int(y0), int(h)+1, int(step_y))
-        zs = range(int(z0), int(w)+1, int(step_z))
+        xs = range(int(x0), int(x0+l)+1, int(step_x))
+        ys = range(int(y0), int(y0+h)+1, int(step_y))
+        zs = range(int(z0), int(z0+w)+1, int(step_z))
 
         for x in xs:
             for y in ys:
                 for z in zs:
                     self[vector(x, y, z)] = self(vector(x, y, z))
 
-        self.max_mag = max(mag for mag, hat in self.Ps.values())
+        self.max_mag = max(B.mag for B in self.Ps.values())
 
         for x in xs:
             for y in ys:
                 for z in zs:
                     self.draw_at(vector(x, y, z))
+
 
     def __getitem__(self, P):
         if P in self.Ps:
@@ -114,6 +129,14 @@ class BField(Field):
     """
 
     def __call__(self, P):
+        start = vector(0, 0, 0)
+        for duc in self.ducs:
+            start += duc.bfield_at(P)
+
+        return start
+
+        return sum((duc.bfield_at(P) for duc in self.ducs), vector(0, 0, 0))
+
         mag = 0
         hat = vector(0, 0, 0)
         for duc in self.ducs:
@@ -123,3 +146,11 @@ class BField(Field):
             hat += h
 
         return mag, hat
+
+
+class EField(Field):
+    """
+    An electric (E) field.
+    """
+
+    pass
