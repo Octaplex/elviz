@@ -67,8 +67,10 @@ class Coil(BInducer):
         self.oner = matrix([[1,0,0], [0,1,0], [0,0,1]])
 
         # rotation matrices for this coil, rotating so norm becomes z axis
-        self.rotate = self.find_rotmatrix(normal.norm(), vector(0, 0, 1))
-        self.antiRotate = linalg.inv(self.rotate)
+        self.rotate = matrix([[1,0,0],[0,1,0],[0,0,1]])
+        self.rotate = self.find_rotmatrix(normal.norm(), vector(0, 0, 1))    #TESTING
+        self.antiRotate = matrix([[1,0,0],[0,1,0],[0,0,1]])
+        self.antiRotate = linalg.inv(self.rotate)     #TESTING
 
         # the helix
         if loops == 1:
@@ -116,5 +118,6 @@ class Coil(BInducer):
              ((self.radius**2 + r**2) * E(k**2) - alpha**2 * K(k**2))
 
         # untranslate points and re-align to actual normal
-        B = vector(Bx, By, Bz)
+        B = norm(vector(Bx, By, Bz))
+        #B = vector(Bx, By, Bz)
         return vector(dot(self.antiRotate, matrix(B).transpose()))
