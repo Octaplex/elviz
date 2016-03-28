@@ -67,8 +67,8 @@ class Field:
 
         B = self[P]
 
-        val = B.mag/self.max_mag
-        arrow(pos = P, axis = 1.5*val*B.norm(), shaftwidth = 0.1,
+        val = B.mag
+        arrow(pos = P, axis = 1.5*B.norm(), shaftwidth = 0.1,
                 color = interpolate(self.color, val), opacity = 2*val)
 
     def draw(self, origin, size, step):
