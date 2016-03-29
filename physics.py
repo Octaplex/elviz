@@ -2,15 +2,12 @@ from __future__ import division, print_function
 
 from visual import *
 
-from util import interpolate
+from operator import add
+from util import interpolate, avg
 
 class Inducer:
     """
     The abstract base class for all field inducers.
-
-    This class is just the placeholder for the root of the inducer tree; it is
-    used by Field to do some preliminary argument checking. It defines no
-    methods on its own.
     """
     pass
 
@@ -67,9 +64,11 @@ class Field:
 
         B = self[P]
 
-        val = B.mag/self.max_mag
-        arrow(pos = P, axis = 1.5*val*B.norm(), shaftwidth = 0.1,
-                color = interpolate(self.color, val), opacity = 2*val)
+        val = B.mag/self.avg_mag
+        arrow(pos = P, axis = val*B.norm(), shaftwidth = 0.1,
+                color = interpolate(self.color, val), opacity = val)
+
+        print(B.mag, val)
 
     def draw(self, origin, size, step):
         """
@@ -84,7 +83,7 @@ class Field:
         x0, y0, z0 = origin
 
         try:
-            l, w, h = size
+            l, h, w = size
         except TypeError:
             l = w = h = size
 
@@ -102,7 +101,7 @@ class Field:
                 for z in zs:
                     self[vector(x, y, z)] = self(vector(x, y, z))
 
-        self.max_mag = max(B.mag for B in self.Ps.values())
+        self.avg_mag = avg(B.mag for B in self.Ps.values())
 
         for x in xs:
             for y in ys:
@@ -129,28 +128,14 @@ class BField(Field):
     """
 
     def __call__(self, P):
-        start = vector(0, 0, 0)
-        for duc in self.ducs:
-            start += duc.bfield_at(P)
-
-        return start
-
-        return sum((duc.bfield_at(P) for duc in self.ducs), vector(0, 0, 0))
-
-        mag = 0
-        hat = vector(0, 0, 0)
-        for duc in self.ducs:
-            m, h = duc.bfield_at(P)
-
-            mag += m
-            hat += h
-
-        return mag, hat
-
+        dbs = [duc.bfield_at(P) for duc in self.ducs]
+        return reduce(add, dbs, vector(0, 0, 0))
 
 class EField(Field):
     """
     An electric (E) field.
     """
 
-    pass
+    def __call__(self, P):
+        des = [duc.efield_at(P) for duc in self.ducs]
+        return reduce(add, des, vector(0, 0, 0))
