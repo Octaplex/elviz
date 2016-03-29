@@ -1,7 +1,7 @@
 from __future__ import division, print_function
 
-from visual_common.primitives import cylinder, ring, helix
-from visual_common.cvisual import vector
+from visual import vector, cylinder, ring, helix
+
 from numpy import matrix
 from numpy.linalg import inv
 from math import pi, sin, cos
@@ -15,21 +15,19 @@ class Wire(BInducer, EInducer):
     A straight wire.
     """
 
-    def __init__(self, A, B, I):
-        # coordinates
+    def __init__(self, A, B, I, scene):
         self.A = A
         self.B = B
 
-        # length
         self.BA = self.B - self.A
         self.l = self.BA.mag
         self.l2 = self.BA.mag2
 
-        # current
         self.I = self.BA.norm() * I
 
-        # the rod
-        self.rod = cylinder(pos = self.A, axis = self.BA, radius = 0.1)
+        self.rod = cylinder(pos = self.A, axis = self.BA, radius = 0.1,
+                display = scene)
+
 
     def ray_to(self, P):
         """
@@ -46,18 +44,14 @@ class Wire(BInducer, EInducer):
     def bfield_at(self, P):
         r = self.ray_to(P)
 
-        # special case to avoid division by 0
         if r.mag == 0: return vector(0, 0, 0)
-
         return (mu_0 * self.I.mag / (2*pi*r.mag)) * r.cross(self.I).norm()
 
 
     def efield_at(self, P):
         r = self.ray_to(P)
 
-        # special case to avoid division by 0
         if r.mag == 0: return vector(0, 0, 0)
-
         return (self.I / (2*pi*eps_0*self.l*r)) * r.norm()
 
 
@@ -66,7 +60,7 @@ class Coil(BInducer):
     A coil of wire.
     """
 
-    def __init__(self, center, radius, normal, I, loops = 1, pitch = 1):
+    def __init__(self, center, radius, normal, I, scene, loops = 1, pitch = 1):
         self.center = center
         self.radius = radius
         self.normal = normal
@@ -87,13 +81,13 @@ class Coil(BInducer):
         self.antiRotate = matrix([[1,0,0],[0,1,0],[0,0,1]])
         self.antiRotate = inv(self.rotate)     #TESTING
 
-        # the helix
         if loops == 1:
             self.helix = ring(pos = center, axis = normal*self.length,
-                    radius = radius, thickness = 0.1)
+                    radius = radius, thickness = 0.1, display = scene)
         else:
             self.helix = helix(pos = center, axis = normal*self.length,
-                    radius = radius, coils = loops, thickness = 0.1)
+                    radius = radius, coils = loops, thickness = 0.1,
+                    display = scene)
 
     def find_rotmatrix(self, a, b):
         # http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
@@ -134,5 +128,4 @@ class Coil(BInducer):
 
         # untranslate points and re-align to actual normal
         B = vector(Bx, By, Bz).norm()
-        #B = vector(Bx, By, Bz)
         return vector(self.antiRotate.dot(matrix(B).transpose()))

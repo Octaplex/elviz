@@ -1,7 +1,6 @@
 from __future__ import division, print_function
 
-from visual_common.primitives import arrow
-from visual_common.cvisual import vector
+from visual import arrow, vector
 
 from operator import add
 from util import interpolate, avg
@@ -51,7 +50,8 @@ class Field:
     Fields maintain a list of inducers called ducs.
     """
 
-    def __init__(self, ducs = [], color = (0, 1, 0)):
+    def __init__(self, scene, ducs = [], color = (0, 1, 0)):
+        self.scene = scene
         self.ducs = ducs
         self.color = color
         self.Ps = {}
@@ -67,7 +67,8 @@ class Field:
 
         val = B.mag/self.avg_mag
         arrow(pos = P, axis = val*B.norm(), shaftwidth = 0.1,
-                color = interpolate(self.color, val), opacity = val)
+                display = self.scene, color = interpolate(self.color, val),
+                opacity = val)
 
 
     def draw(self, origin, size, step):
