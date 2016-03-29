@@ -1,7 +1,11 @@
 from __future__ import division, print_function
 
-from visual import *
+from visual_common.primitives import cylinder, ring, helix
+from visual_common.cvisual import vector
+from numpy import matrix
+from numpy.linalg import inv
 from math import pi, sin, cos
+
 from physics import *
 from constants import mu_0, eps_0
 from util import K, E
@@ -74,14 +78,14 @@ class Coil(BInducer):
         self.I = I
 
         # some consonants
-        self.C = mu_0*I/math.pi
+        self.C = mu_0*I/pi
         self.oner = matrix([[1,0,0], [0,1,0], [0,0,1]])
 
         # rotation matrices for this coil, rotating so norm becomes z axis
         self.rotate = matrix([[1,0,0],[0,1,0],[0,0,1]])
         self.rotate = self.find_rotmatrix(normal.norm(), vector(0, 0, 1))    #TESTING
         self.antiRotate = matrix([[1,0,0],[0,1,0],[0,0,1]])
-        self.antiRotate = linalg.inv(self.rotate)     #TESTING
+        self.antiRotate = inv(self.rotate)     #TESTING
 
         # the helix
         if loops == 1:
@@ -93,7 +97,7 @@ class Coil(BInducer):
 
     def find_rotmatrix(self, a, b):
         # http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
-        v = cross(a, b)
+        v = a.cross(b)
 
         # creating [v]x, skew symmetric matrix
         # https://en.wikipedia.org/wiki/Skew-symmetric_matrix
@@ -101,12 +105,12 @@ class Coil(BInducer):
                      [ v.z, 0,  -v.x],
                      [-v.y, v.x, 0  ]])
 
-        return self.oner + vx + vx**2 * (1 - dot(a, b)) / v.mag2
+        return self.oner + vx + vx**2 * (1 - a.dot(b)) / v.mag2
 
 
     def bfield_at(self, P):
         # translate center to origin and align normal to z axis
-        Pr = vector(dot(self.rotate, matrix(P - self.center).transpose()))
+        Pr = vector(self.rotate.dot(matrix(P - self.center).transpose()))
         rx, ry, rz = Pr
 
         # defining variables for equation
@@ -129,6 +133,6 @@ class Coil(BInducer):
              ((self.radius**2 + r**2) * E(k**2) - alpha**2 * K(k**2))
 
         # untranslate points and re-align to actual normal
-        B = norm(vector(Bx, By, Bz))
+        B = vector(Bx, By, Bz).norm()
         #B = vector(Bx, By, Bz)
-        return vector(dot(self.antiRotate, matrix(B).transpose()))
+        return vector(self.antiRotate.dot(matrix(B).transpose()))

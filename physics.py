@@ -1,6 +1,7 @@
 from __future__ import division, print_function
 
-from visual import *
+from visual_common.primitives import arrow
+from visual_common.cvisual import vector
 
 from operator import add
 from util import interpolate, avg
@@ -50,7 +51,7 @@ class Field:
     Fields maintain a list of inducers called ducs.
     """
 
-    def __init__(self, ducs = [], color = color.green):
+    def __init__(self, ducs = [], color = (0, 1, 0)):
         self.ducs = ducs
         self.color = color
         self.Ps = {}
