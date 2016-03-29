@@ -68,7 +68,6 @@ class Field:
         arrow(pos = P, axis = val*B.norm(), shaftwidth = 0.1,
                 color = interpolate(self.color, val), opacity = val)
 
-        print(B.mag, val)
 
     def draw(self, origin, size, step):
         """
