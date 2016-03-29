@@ -3,10 +3,10 @@ from __future__ import division, print_function
 from visual import *
 from math import pi, sin, cos
 from physics import *
-from constants import mu_0
+from constants import mu_0, eps_0
 from util import K, E
 
-class Wire(BInducer):
+class Wire(BInducer, EInducer):
     """
     A straight wire.
     """
@@ -27,23 +27,34 @@ class Wire(BInducer):
         # the rod
         self.rod = cylinder(pos = self.A, axis = self.BA, radius = 0.1)
 
+    def ray_to(self, P):
+        """
+        Calculate the shortest vector from the wire to a point P.
+
+        Adapted from:
+        http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
+        """
+
+        t = -self.BA.dot(self.A - P) / self.l2
+        return P - (self.A + t*self.BA)
+
 
     def bfield_at(self, P):
-        # compute the shortest distance d from the wire to point P
-        # V is the closest point on the wire to point P (needed to calculate
-        # the direction of the field, see below)
-        #
-        # adapted from
-        # http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
-
-        # get nearest point to wire
-        t = -self.BA.dot(self.A - P) / self.l2
-        r = P - (self.A + t*self.BA)
+        r = self.ray_to(P)
 
         # special case to avoid division by 0
         if r.mag == 0: return vector(0, 0, 0)
 
         return (mu_0 * self.I.mag / (2*pi*r.mag)) * r.cross(self.I).norm()
+
+
+    def efield_at(self, P):
+        r = self.ray_to(P)
+
+        # special case to avoid division by 0
+        if r.mag == 0: return vector(0, 0, 0)
+
+        return (self.I / (2*pi*eps_0*self.l*r)) * r.norm()
 
 
 class Coil(BInducer):
