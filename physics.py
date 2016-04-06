@@ -65,10 +65,6 @@ class Field:
 
         B = self[P]
 
-        #conflict
-        val = B.mag
-        arrow(pos = P, axis = 1.5*B.norm(), shaftwidth = 0.1,
-                color = interpolate(self.color, val), opacity = 2*val)
         val = B.mag/self.avg_mag
         arrow(pos = P, axis = val*B.norm(), shaftwidth = 0.1,
                 color = interpolate(self.color, val), opacity = val)

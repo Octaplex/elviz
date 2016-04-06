@@ -122,22 +122,17 @@ class Coil(BInducer):
         beta = (self.radius**2 + r**2 + 2*self.radius*(rho))**0.5
         gamma = rx**2 - ry**2
         k = (1 - (alpha**2/beta**2))**0.5
+        C = mu_0*self.I / pi
 
         if alpha == 0 or beta == 0 or rho == 0 or rx == 0: return vector(0, 0, 0)
 
         # components
-        Bx = (self.C*rx*rz / (2*alpha**2*beta*rho**2)) * \
+        Bx = (C*rx*rz / (2*alpha**2*beta*rho**2)) * \
              ((self.radius**2 + r**2) * E(k**2) - alpha**2 * K(k**2))
         By = Bx * (ry/rx)
-        Bz = (self.C/(2*alpha**2*(beta))) * \
-             ((self.radius**2 + r**2) * E(k**2) - alpha**2 * K(k**2))
+        Bz = (C/(2*alpha**2*beta)) * \
+             ((self.radius**2 - r**2) * E(k**2) + alpha**2 * K(k**2))
 
         # untranslate points and re-align to actual normal
-
-        #conflict
-        #B = norm(vector(Bx, By, Bz))
-        B = vector(Bx, By, Bz)
-        return vector(dot(self.antiRotate, matrix(B).transpose()))
         B = vector(Bx, By, Bz).norm()
-        #B = vector(Bx, By, Bz)
         return vector(self.antiRotate.dot(matrix(B).transpose()))
