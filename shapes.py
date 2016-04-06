@@ -82,10 +82,8 @@ class Coil(BInducer):
         self.oner = matrix([[1,0,0], [0,1,0], [0,0,1]])
 
         # rotation matrices for this coil, rotating so norm becomes z axis
-        self.rotate = matrix([[1,0,0],[0,1,0],[0,0,1]])
-        self.rotate = self.find_rotmatrix(normal.norm(), vector(0, 0, 1))    #TESTING
-        self.antiRotate = matrix([[1,0,0],[0,1,0],[0,0,1]])
-        self.antiRotate = inv(self.rotate)     #TESTING
+        self.rotate = self.find_rotmatrix(normal.norm(), vector(0, 0, 1))    
+        self.antiRotate = inv(self.rotate)     
 
         # the helix
         if loops == 1:
@@ -96,6 +94,9 @@ class Coil(BInducer):
                     radius = radius, coils = loops, thickness = 0.1)
 
     def find_rotmatrix(self, a, b):
+        if a == vector(0, 0, 1):
+            return matrix([[1,0,0],[0,1,0],[0,0,1]])
+        
         # http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
         v = a.cross(b)
 
