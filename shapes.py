@@ -170,6 +170,11 @@ class Coil(Shape, BInducer):
              ((self.radius**2 + r**2) * E(k**2) - alpha**2 * K(k**2))
 
         # untranslate points and re-align to actual normal
+
+        #conflict
+        #B = norm(vector(Bx, By, Bz))
+        B = vector(Bx, By, Bz)
+        return vector(dot(self.antiRotate, matrix(B).transpose()))
         B = vector(Bx, By, Bz).norm()
         return vector(self.antiRotate.dot(matrix(B).transpose()))
 
