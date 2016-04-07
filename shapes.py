@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-from visual import vector, cylinder, ring, helix
+from visual import vector, cylinder, ring, helix, box, sphere
 
 from numpy import matrix
 from numpy.linalg import inv
@@ -191,32 +191,37 @@ class Bar(Shape, BInducer):
         self.pos = pos
         self.axis = axis
 
-        self.south = pos - axis*(length/2)
-        self.north = pos + axis*(length/2)
+        self.south = Particle(pos - axis*(length/2), moment*axis)
+        self.north = Particle(pos + axis*(length/2), moment*axis)
         self.length = length
 
-        self.moment = moment*axis.rotate(angle=pi/2, axis=axis)
+        #self.moment = moment*axis.rotate(angle=pi/2, axis=axis)
 
         self.obj = box(pos = pos, axis = axis, length = length,
                 height = height, width = width, display = scene)
 
 
-    def bfield_from_pole(self, pole, P):
-        """
-        Calculate the bfield contribution from one pole of the magnet.
+    def bfield_at(self, P):
+        return self.north.bfield_at(P) + self.south.bfield_at(P)
 
-        Adapated from:
-        https://en.wikipedia.org/wiki/Dipole
-        """
 
-        r = P - pole
-        rhat = r.norm()
+class Particle(Shape, BInducer):
+    """
+    A point particle.
+    """
 
-        # dirac weirdness
-        if r.mag2 == 0: return 0
+    def __init__(self, pos, moment, scene = None):
+        self.pos = pos
+        self.moment = moment
 
-        return (mu_0/(4*pi))*(3*self.moment.dot(rhat)*rhat - self.moment)/(r.mag**3)
+        if scene:
+            Shape.__init__(self, scene)
+            self.obj = sphere(pos = pos, radius = 0.5, display = scene)
 
 
     def bfield_at(self, P):
-        return self.bfield_from_pole(self.north, P) + self.bfield_from_pole(self.south, P)
+        r = P - self.pos
+        rhat = r.norm()
+
+        if r.mag2 == 0: return vector(0, 0, 0)
+        return (mu_0/(4*pi))*(3*self.moment.dot(rhat)*rhat - self.moment)/(r.mag**3)
