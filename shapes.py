@@ -21,14 +21,12 @@ class Shape:
     def __init__(self, scene):
         scene.bind('mousedown', self.grab)
 
-
     def grab(self, evt):
         """Grab the mouse and bind some more events."""
         if evt.pick == self:
             self.drag_pos = evt.pickpos
             self.scene.bind('mousemove', self.move)
             self.scene.bind('mouseup', self.drop)
-
 
     def move(self, evt):
         """Move the object when the mouse moves."""
@@ -37,12 +35,10 @@ class Shape:
             self.moveto(new_pos - self.drag_pos)
             self.drag_pos = new_pos
 
-
     def drop(self, evt):
         """Unbind events and clean up when the mouse is released."""
         self.scene.unbind('mousemove', self.move)
         self.scene.unbine('mouseup', self.drop)
-
 
     def moveto(self, pos):
         """Move the VPython object to a new position."""
@@ -69,7 +65,6 @@ class Wire(Shape, BInducer, EInducer):
         self.obj = cylinder(pos = self.A, axis = self.BA, radius = 0.1,
                 display = scene)
 
-
     def ray_to(self, P):
         """
         Calculate the shortest vector from the wire to a point P.
@@ -81,13 +76,11 @@ class Wire(Shape, BInducer, EInducer):
         t = -self.BA.dot(self.A - P) / self.l2
         return P - (self.A + t*self.BA)
 
-
     def bfield_at(self, P):
         r = self.ray_to(P)
 
         if r.mag == 0: return vector(0, 0, 0)
         return (mu_0 * self.I.mag / (2*pi*r.mag)) * r.cross(self.I).norm()
-
 
     def efield_at(self, P):
         r = self.ray_to(P)
@@ -119,8 +112,8 @@ class Coil(Shape, BInducer):
         self.oner = matrix([[1,0,0], [0,1,0], [0,0,1]])
 
         # rotation matrices for this coil, rotating so norm becomes z axis
-        self.rotate = self.find_rotmatrix(normal.norm(), vector(0, 0, 1))    
-        self.antiRotate = inv(self.rotate)     
+        self.rotate = self.find_rotmatrix(normal.norm(), vector(0, 0, 1))
+        self.antiRotate = inv(self.rotate)
 
         if loops == 1:
             self.obj = ring(pos = center, axis = normal*self.length,
@@ -133,7 +126,7 @@ class Coil(Shape, BInducer):
     def find_rotmatrix(self, a, b):
         if a == vector(0, 0, 1):
             return matrix([[1,0,0],[0,1,0],[0,0,1]])
-        
+
         # http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
         v = a.cross(b)
 
@@ -144,7 +137,6 @@ class Coil(Shape, BInducer):
                      [-v.y, v.x, 0  ]])
 
         return self.oner + vx + vx**2 * (1 - a.dot(b)) / v.mag2
-
 
     def bfield_at(self, P):
         # translate center to origin and align normal to z axis
@@ -195,11 +187,8 @@ class Bar(Shape, BInducer):
         self.north = Particle(pos + axis*(length/2), moment*axis)
         self.length = length
 
-        #self.moment = moment*axis.rotate(angle=pi/2, axis=axis)
-
         self.obj = box(pos = pos, axis = axis, length = length,
                 height = height, width = width, display = scene)
-
 
     def bfield_at(self, P):
         return self.north.bfield_at(P) + self.south.bfield_at(P)
@@ -218,10 +207,10 @@ class Particle(Shape, BInducer):
             Shape.__init__(self, scene)
             self.obj = sphere(pos = pos, radius = 0.5, display = scene)
 
-
     def bfield_at(self, P):
         r = P - self.pos
         rhat = r.norm()
 
         if r.mag2 == 0: return vector(0, 0, 0)
         return (mu_0/(4*pi))*(3*self.moment.dot(rhat)*rhat - self.moment)/(r.mag**3)
+
