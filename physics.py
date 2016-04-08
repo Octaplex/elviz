@@ -5,19 +5,9 @@ from visual import arrow, vector
 from operator import add
 from util import interpolate, avg
 
-class Inducer:
-    """
-    The abstract base class for all field inducers.
-    """
-    pass
-
-
 class BInducer:
     """
     A magnetic (B) field inducer.
-
-    Like inducer, this class is more or less a placeholder. It does define the
-    method bfield_strength which must be implemented by all subclasses.
     """
 
     def bfield_at(self, P):
@@ -28,9 +18,6 @@ class BInducer:
 class EInducer:
     """
     An electric (E) field inducer.
-
-    Like inducer, this class is more or less a placeholder. It does define the
-    method efield_strength which must be implemented by all subclasses.
     """
 
     def efield_at(self, P):
