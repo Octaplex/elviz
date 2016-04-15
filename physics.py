@@ -5,19 +5,9 @@ from visual import arrow, vector
 from operator import add
 from util import interpolate, avg
 
-class Inducer:
-    """
-    The abstract base class for all field inducers.
-    """
-    pass
-
-
 class BInducer:
     """
     A magnetic (B) field inducer.
-
-    Like inducer, this class is more or less a placeholder. It does define the
-    method bfield_strength which must be implemented by all subclasses.
     """
 
     def bfield_at(self, P):
@@ -28,9 +18,6 @@ class BInducer:
 class EInducer:
     """
     An electric (E) field inducer.
-
-    Like inducer, this class is more or less a placeholder. It does define the
-    method efield_strength which must be implemented by all subclasses.
     """
 
     def efield_at(self, P):
@@ -65,15 +52,10 @@ class Field:
 
         B = self[P]
 
-        #conflict
-        val = B.mag
-        arrow(pos = P, axis = 1.5*B.norm(), shaftwidth = 0.1,
-                color = interpolate(self.color, val), opacity = 2*val)
         val = B.mag/self.avg_mag
-        arrow(pos = P, axis = val*B.norm(), shaftwidth = 0.1,
+        arrow(pos = P, axis = B.norm(), shaftwidth = 0.1,
                 display = self.scene, color = interpolate(self.color, val),
                 opacity = val)
-
 
     def draw(self, origin, size, step):
         """
@@ -113,7 +95,6 @@ class Field:
                 for z in zs:
                     self.draw_at(vector(x, y, z))
 
-
     def __getitem__(self, P):
         if P in self.Ps:
             return self.Ps[P]
@@ -127,6 +108,7 @@ class Field:
 
     def __call__(self, P): raise NotImplementedError
 
+
 class BField(Field):
     """
     A magnetic (B) field.
@@ -136,6 +118,7 @@ class BField(Field):
         dbs = [duc.bfield_at(P) for duc in self.ducs]
         return reduce(add, dbs, vector(0, 0, 0))
 
+
 class EField(Field):
     """
     An electric (E) field.
@@ -144,3 +127,4 @@ class EField(Field):
     def __call__(self, P):
         des = [duc.efield_at(P) for duc in self.ducs]
         return reduce(add, des, vector(0, 0, 0))
+

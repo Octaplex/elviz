@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-from visual import vector, cylinder, ring, helix
+from visual import vector, cylinder, ring, helix, box, sphere
 
 from numpy import matrix
 from numpy.linalg import inv
@@ -21,14 +21,12 @@ class Shape:
     def __init__(self, scene):
         scene.bind('mousedown', self.grab)
 
-
     def grab(self, evt):
         """Grab the mouse and bind some more events."""
         if evt.pick == self:
             self.drag_pos = evt.pickpos
             self.scene.bind('mousemove', self.move)
             self.scene.bind('mouseup', self.drop)
-
 
     def move(self, evt):
         """Move the object when the mouse moves."""
@@ -37,12 +35,10 @@ class Shape:
             self.moveto(new_pos - self.drag_pos)
             self.drag_pos = new_pos
 
-
     def drop(self, evt):
         """Unbind events and clean up when the mouse is released."""
         self.scene.unbind('mousemove', self.move)
         self.scene.unbine('mouseup', self.drop)
-
 
     def moveto(self, pos):
         """Move the VPython object to a new position."""
@@ -69,7 +65,6 @@ class Wire(Shape, BInducer, EInducer):
         self.obj = cylinder(pos = self.A, axis = self.BA, radius = 0.1,
                 display = scene)
 
-
     def ray_to(self, P):
         """
         Calculate the shortest vector from the wire to a point P.
@@ -81,13 +76,11 @@ class Wire(Shape, BInducer, EInducer):
         t = -self.BA.dot(self.A - P) / self.l2
         return P - (self.A + t*self.BA)
 
-
     def bfield_at(self, P):
         r = self.ray_to(P)
 
         if r.mag == 0: return vector(0, 0, 0)
         return (mu_0 * self.I.mag / (2*pi*r.mag)) * r.cross(self.I).norm()
-
 
     def efield_at(self, P):
         r = self.ray_to(P)
@@ -119,10 +112,8 @@ class Coil(Shape, BInducer):
         self.oner = matrix([[1,0,0], [0,1,0], [0,0,1]])
 
         # rotation matrices for this coil, rotating so norm becomes z axis
-        self.rotate = matrix([[1,0,0],[0,1,0],[0,0,1]])
-        self.rotate = self.find_rotmatrix(normal.norm(), vector(0, 0, 1))    #TESTING
-        self.antiRotate = matrix([[1,0,0],[0,1,0],[0,0,1]])
-        self.antiRotate = inv(self.rotate)     #TESTING
+        self.rotate = self.find_rotmatrix(normal.norm(), vector(0, 0, 1))
+        self.antiRotate = inv(self.rotate)
 
         if loops == 1:
             self.obj = ring(pos = center, axis = normal*self.length,
@@ -133,6 +124,9 @@ class Coil(Shape, BInducer):
                     display = scene)
 
     def find_rotmatrix(self, a, b):
+        if a == vector(0, 0, 1):
+            return matrix([[1,0,0],[0,1,0],[0,0,1]])
+
         # http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
         v = a.cross(b)
 
@@ -144,39 +138,41 @@ class Coil(Shape, BInducer):
 
         return self.oner + vx + vx**2 * (1 - a.dot(b)) / v.mag2
 
-
     def bfield_at(self, P):
-        # translate center to origin and align normal to z axis
-        Pr = vector(self.rotate.dot(matrix(P - self.center).transpose()))
-        rx, ry, rz = Pr
+        res = vector(0, 0, 0)
 
-        # defining variables for equation
-        # http://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20010038494.pdf
-        r = Pr.mag
+        for l in range(0, self.loops):
+            C = self.center + self.normal*self.pitch*l
 
-        rho = (rx**2 + ry**2)**0.5
-        alpha = (self.radius**2 + r**2 - 2*self.radius*(rho))**0.5
-        beta = (self.radius**2 + r**2 + 2*self.radius*(rho))**0.5
-        gamma = rx**2 - ry**2
-        k = (1 - (alpha**2/beta**2))**0.5
+            # translate center to origin and align normal to z axis
+            Pr = vector(self.rotate.dot(matrix(P - C).transpose()))
+            rx, ry, rz = Pr
 
-        if alpha == 0 or beta == 0 or rho == 0 or rx == 0: return vector(0, 0, 0)
+            # defining variables for equation
+            # http://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20010038494.pdf
+            r = Pr.mag
 
-        # components
-        Bx = (self.C*rx*rz / (2*alpha**2*beta*rho**2)) * \
-             ((self.radius**2 + r**2) * E(k**2) - alpha**2 * K(k**2))
-        By = Bx * (ry/rx)
-        Bz = (self.C/(2*alpha**2*(beta))) * \
-             ((self.radius**2 + r**2) * E(k**2) - alpha**2 * K(k**2))
+            rho = (rx**2 + ry**2)**0.5
+            alpha = (self.radius**2 + r**2 - 2*self.radius*(rho))**0.5
+            beta = (self.radius**2 + r**2 + 2*self.radius*(rho))**0.5
+            gamma = rx**2 - ry**2
+            k = (1 - (alpha**2/beta**2))**0.5
+            C = mu_0*self.I / pi
 
-        # untranslate points and re-align to actual normal
+            if alpha == 0 or beta == 0 or rho == 0 or rx == 0: continue
 
-        #conflict
-        #B = norm(vector(Bx, By, Bz))
-        B = vector(Bx, By, Bz)
-        return vector(dot(self.antiRotate, matrix(B).transpose()))
-        B = vector(Bx, By, Bz).norm()
-        return vector(self.antiRotate.dot(matrix(B).transpose()))
+            # components
+            Bx = (C*rx*rz / (2*alpha**2*beta*rho**2)) * \
+                 ((self.radius**2 + r**2) * E(k**2) - alpha**2 * K(k**2))
+            By = Bx * (ry/rx)
+            Bz = (C/(2*alpha**2*beta)) * \
+                 ((self.radius**2 - r**2) * E(k**2) + alpha**2 * K(k**2))
+
+            # untranslate points and re-align to actual normal
+            B = vector(Bx, By, Bz).norm()
+            res += vector(self.antiRotate.dot(matrix(B).transpose()))
+
+        return res
 
 
 class Bar(Shape, BInducer):
@@ -194,32 +190,34 @@ class Bar(Shape, BInducer):
         self.pos = pos
         self.axis = axis
 
-        self.south = pos - axis*(length/2)
-        self.north = pos + axis*(length/2)
+        self.south = Particle(pos - axis*(length/2), moment*axis)
+        self.north = Particle(pos + axis*(length/2), moment*axis)
         self.length = length
-
-        self.moment = moment*axis.rotate(angle=pi/2, axis=axis)
 
         self.obj = box(pos = pos, axis = axis, length = length,
                 height = height, width = width, display = scene)
 
+    def bfield_at(self, P):
+        return self.north.bfield_at(P) + self.south.bfield_at(P)
 
-    def bfield_from_pole(self, pole, P):
-        """
-        Calculate the bfield contribution from one pole of the magnet.
 
-        Adapated from:
-        https://en.wikipedia.org/wiki/Dipole
-        """
+class Particle(Shape, BInducer):
+    """
+    A point particle.
+    """
 
-        r = P - pole
-        rhat = r.norm()
+    def __init__(self, pos, moment, scene = None):
+        self.pos = pos
+        self.moment = moment
 
-        # dirac weirdness
-        if r.mag2 == 0: return 0
-
-        return (mu_0/(4*pi))*(3*self.moment.dot(rhat)*rhat - self.moment)/(r.mag**3)
-
+        if scene:
+            Shape.__init__(self, scene)
+            self.obj = sphere(pos = pos, radius = 0.5, display = scene)
 
     def bfield_at(self, P):
-        return self.bfield_from_pole(self.north, P) + self.bfield_from_pole(self.south, P)
+        r = P - self.pos
+        rhat = r.norm()
+
+        if r.mag2 == 0: return vector(0, 0, 0)
+        return (mu_0/(4*pi))*(3*self.moment.dot(rhat)*rhat - self.moment)/(r.mag**3)
+
