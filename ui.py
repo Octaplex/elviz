@@ -6,4 +6,3 @@ class Elviz:
     def __init__(self, title='Elviz'):
         self.window = window(menus=False, title=title)
         self.scene = display(window=self.window, width=self.window.width, height=self.window.height)
-
