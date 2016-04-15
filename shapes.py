@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-from visual import vector, cylinder, ring, helix, box, sphere
+from visual import vector, cylinder, ring, helix, box, sphere, materials
 
 from numpy import matrix
 from numpy.linalg import inv
@@ -63,7 +63,7 @@ class Wire(Shape, BInducer, EInducer):
         self.I = self.BA.norm() * I
 
         self.obj = cylinder(pos = self.A, axis = self.BA, radius = 0.1,
-                display = scene)
+                display = scene, material = materials.silver)
 
     def ray_to(self, P):
         """
@@ -117,11 +117,12 @@ class Coil(Shape, BInducer):
 
         if loops == 1:
             self.obj = ring(pos = center, axis = normal*self.length,
-                    radius = radius, thickness = 0.1, display = scene)
+                    radius = radius, thickness = 0.1, display = scene,
+                    material = materials.chrome)
         else:
             self.obj = helix(pos = center, axis = normal*self.length,
                     radius = radius, coils = loops, thickness = 0.1,
-                    display = scene)
+                    display = scene, material = materials.chrome)
 
     def find_rotmatrix(self, a, b):
         if a == vector(0, 0, 1):
@@ -195,7 +196,8 @@ class Bar(Shape, BInducer):
         self.length = length
 
         self.obj = box(pos = pos, axis = axis, length = length,
-                height = height, width = width, display = scene)
+                height = height, width = width, display = scene,
+                material = materials.chrome)
 
     def bfield_at(self, P):
         return self.north.bfield_at(P) + self.south.bfield_at(P)
