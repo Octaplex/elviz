@@ -1,7 +1,7 @@
 Elviz v.1.0
 
 =====================================================================================================================================
-Installation:
+Installation for Windows:
 
 1.) Install Python 2.7.9 with the file named "python-2.7.9-win-install"
 
