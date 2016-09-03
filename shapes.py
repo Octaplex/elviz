@@ -2,13 +2,11 @@ from __future__ import division, print_function
 
 from visual import vector, cylinder, ring, helix, box, sphere, materials
 
-from numpy import matrix
-from numpy.linalg import inv
 from math import pi, sin, cos
 
 from physics import *
 from constants import mu_0, eps_0
-from util import K, E
+from util import K, E, matrixDot, matrixAdd, inverse, scalarProd
 
 class Shape:
     """
@@ -109,11 +107,12 @@ class Coil(Shape, BInducer):
 
         # some consonants
         self.C = mu_0*I/pi
-        self.oner = matrix([[1,0,0], [0,1,0], [0,0,1]])
+        self.oner = [[1,0,0], [0,1,0], [0,0,1]]
 
         # rotation matrices for this coil, rotating so norm becomes z axis
         self.rotate = self.find_rotmatrix(normal.norm(), vector(0, 0, 1))
-        self.antiRotate = inv(self.rotate)
+        self.antiRotate = inverse(self.rotate)
+
 
         if loops == 1:
             self.obj = ring(pos = center, axis = normal*self.length,
@@ -126,29 +125,33 @@ class Coil(Shape, BInducer):
 
     def find_rotmatrix(self, a, b):
         if a == vector(0, 0, 1):
-            return matrix([[1,0,0],[0,1,0],[0,0,1]])
+            return [[1,0,0],[0,1,0],[0,0,1]]
+        elif a == vector(0, 0, -1):
+            return [[1,0,0],[0,1,0],[0,0,-1]]
 
         # http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
         v = a.cross(b)
 
         # creating [v]x, skew symmetric matrix
         # https://en.wikipedia.org/wiki/Skew-symmetric_matrix
-        vx = matrix([[ 0,  -v.z, v.y],
-                     [ v.z, 0,  -v.x],
-                     [-v.y, v.x, 0  ]])
+        vx = [[ 0,   -v.z,  v.y],
+              [ v.z,  0,   -v.x],
+              [-v.y,  v.x,  0  ]]
+        
+        return matrixAdd(self.oner, matrixAdd(vx, scalarProd(matrixDot(vx, vx), (1 - a.dot(b))/v.mag)))
 
-        return self.oner + vx + vx**2 * (1 - a.dot(b)) / v.mag2
+
 
     def bfield_at(self, P):
         res = vector(0, 0, 0)
 
         for l in range(0, self.loops):
             C = self.center + self.normal*self.pitch*l
-
+        
             # translate center to origin and align normal to z axis
-            Pr = vector(self.rotate.dot(matrix(P - C).transpose()))
+            comp1 = matrixDot(self.rotate, [[(P - C).x], [(P - C).y], [(P - C).z]])
+            Pr = vector([comp1[0][0], comp1[1][0], comp1[2][0]])  #dot product returns 2d array so need 2 entries
             rx, ry, rz = Pr
-
             # defining variables for equation
             # http://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20010038494.pdf
             r = Pr.mag
@@ -160,18 +163,24 @@ class Coil(Shape, BInducer):
             k = (1 - (alpha**2/beta**2))**0.5
             C = mu_0*self.I / pi
 
-            if alpha == 0 or beta == 0 or rho == 0 or rx == 0: continue
-
+            
+            if alpha == 0 or beta == 0 or rho == 0: continue
             # components
+            
             Bx = (C*rx*rz / (2*alpha**2*beta*rho**2)) * \
                  ((self.radius**2 + r**2) * E(k**2) - alpha**2 * K(k**2))
-            By = Bx * (ry/rx)
+            if rx != 0:
+                By = Bx * (ry/rx)
+            else:
+                By = (C*rx*rz / (2*alpha**2*beta*rho**2)) * \
+                     ((self.radius**2 + r**2) * E(k**2) - alpha**2 * K(k**2))
             Bz = (C/(2*alpha**2*beta)) * \
                  ((self.radius**2 - r**2) * E(k**2) + alpha**2 * K(k**2))
 
             # untranslate points and re-align to actual normal
             B = vector(Bx, By, Bz).norm()
-            res += vector(self.antiRotate.dot(matrix(B).transpose()))
+            comp2 = matrixDot(self.antiRotate, [[B.x], [B.y], [B.z]])
+            res += vector([comp2[0][0], comp2[1][0], comp2[2][0]])
 
         return res
 

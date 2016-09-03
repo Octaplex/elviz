@@ -1,25 +1,19 @@
 Elviz v.1.0
 
 =====================================================================================================================================
-Installation for Windows:
+Installation:
 
-1.) Install Python 2.7.9 with the file named "python-2.7.9-win-install"
+1.) Go to vpython.org --> Download, and follow the instructions
 
-2.) Install Scipy 0.16.1 with the file named "scipy-0.16.1-win32-superpack-python2.7"
+2.) After VPython installs, open up VIDLE for VPython, and click File-->Open in upper left corner
 
-3.) Install Numpy 1.9.2 with the file named "numpy-1.9.2-win32-superpack-python2.7"
+3.) Navigate to the Elviz folder that you just downloaded (try extracting all files onto somewhere convenient to find)
 
-4.) Install VPython 6.11 with the file named "VPython-Win-32-Py2.7-6.11-install"
+4.) Open the file named "elviz"
 
-5.) After VPython installs, open up VIDLE for VPython, and click File-->Open in upper left corner
+5.) Add or modify magnetic inducers using instructions below, or just use the default example code; when the code is set...
 
-6.) Navigate to the Elviz folder that you just downloaded (try extracting all files onto somewhere convenient to find)
-
-7.) Open the file named "elviz"
-
-8.) Add or modify magnetic inducers using instructions below, or just use the default example code; when the code is set...
-
-9.) Click Run-->Run Module to launch the program!
+6.) Click Run-->Run Module to launch the program!
 =====================================================================================================================================
 
 =====================================================================================================================================
@@ -28,7 +22,8 @@ Program Modification:
 To add an inducer, declare a name, and review the examples to set attributes for inducer (for scene, just input "d").
 Change the color by modifying the "color = " tuple, colors are in RGB, each a decimal from 0 to 1; from regular RGB, divide by 255.
 Whatever you named the BField object (the default is B), make sure to use the B.add_inducer(name) for each inducer you add.
-Set the display field using B.draw(vector(starting coordinates), vector(display length in each dimension), step)
+Set the display field using B.draw(vector(starting coordinates), vector(display length in each dimension), step, radius).
+If radius is omitted, the drawing will be rectanguluar.
 =====================================================================================================================================
 
 =====================================================================================================================================

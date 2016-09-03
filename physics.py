@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-from visual import arrow, vector
+from visual import cone, vector
 
 from operator import add
 from util import interpolate, avg
@@ -47,17 +47,23 @@ class Field:
         """Add an inducer to this field."""
         self.ducs += [duc]
 
-    def draw_at(self, P):
+    def draw_at(self, P, step):
         """Draw the field vector at the given point."""
-
         B = self[P]
-
-        val = B.mag/self.avg_mag
-        arrow(pos = P, axis = B.norm(), shaftwidth = 0.1,
+        if self.avg_mag == 0:
+            val = 0
+        else:
+            #get value in between smallest and largest
+            val = 1-((B.mag-self.smallest_mag)\
+                     /(self.largest_mag-self.smallest_mag))
+        #set size of pointers, radius = step/rad
+        rad = 15
+        cone(pos = P, axis = B.norm(), radius=step/rad, length=step,
                 display = self.scene, color = interpolate(self.color, val),
                 opacity = val)
 
-    def draw(self, origin, size, step):
+
+    def draw(self, origin, size, step, radius = -1):
         """
         Draw field vectors periodically within a region.
 
@@ -83,17 +89,21 @@ class Field:
         ys = range(int(y0), int(y0+h)+1, int(step_y))
         zs = range(int(z0), int(z0+w)+1, int(step_z))
 
+        #getting values for color interpolation
         for x in xs:
             for y in ys:
                 for z in zs:
                     self[vector(x, y, z)] = self(vector(x, y, z))
-
         self.avg_mag = avg(B.mag for B in self.Ps.values())
+        self.largest_mag = max(B.mag for B in self.Ps.values())
+        #smallest mag is estimate due to absolute smallest being zero, not useful
+        self.smallest_mag = self.largest_mag- 2*(self.largest_mag - self.avg_mag)
 
         for x in xs:
             for y in ys:
                 for z in zs:
-                    self.draw_at(vector(x, y, z))
+                    if (radius == -1 or (x**2 + y**2 + z**2)**0.5 <= radius):
+                        self.draw_at(vector(x, y, z), step)
 
     def __getitem__(self, P):
         if P in self.Ps:
