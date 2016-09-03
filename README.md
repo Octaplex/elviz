@@ -3,7 +3,7 @@ you — thank you very much — for checking it out.
 
 # Installation
 
-Elviz depends only on VPython in addition to a few features from Numpy and Scipy, for Python 2.7.9.
+Elviz depends only on VPython for Python 2.7.9.
 VPython provides downloads for
 [windows](http://vpython.org/contents/download_windows.html),
 [mac](http://vpython.org/contents/download_mac.html), and
