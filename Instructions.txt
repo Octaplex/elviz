@@ -19,7 +19,7 @@ Installation:
 =====================================================================================================================================
 Program Modification:
 
-To add an inducer, declare a name, and review the examples to set attributes for inducer (for scene, just input "d").
+To add an inducer, declare a name, and review the examples to set attributes for inducer (for scene, input "d").
 Change the color by modifying the "color = " tuple, colors are in RGB, each a decimal from 0 to 1; from regular RGB, divide by 255.
 Whatever you named the BField object (the default is B), make sure to use the B.add_inducer(name) for each inducer you add.
 Set the display field using B.draw(vector(starting coordinates), vector(display length in each dimension), step, radius).
