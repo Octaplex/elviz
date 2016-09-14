@@ -16,7 +16,7 @@ There isn't an installer yet, so to run Elviz you'll have to clone this repo.
 ## On the command line
 
 1. Navigate to the `elviz` directory, wherever you cloned it.
-2. (*optional*) Modify the file `elviz.py` to your liking (see [hacking]).
+2. (*optional*) Modify the file `elviz.py` to your liking (see [hacking](#hacking)).
 3. Execute `python2 elviz.py` in a terminal (or whatever command your distro
    uses for python 2).
 
@@ -26,7 +26,7 @@ VPython comes with a modification of Python's IDLE, called VIDLE, that can also
 be used to run Elviz:
 
 1. Open `elviz.py`, wherever you stored it.
-2. (*optional*) Modify the file to your liking (see [hacking])
+2. (*optional*) Modify the file to your liking (see [hacking](#hacking))
 3. Click `Run > Run Module` to launch the program.
 
 # Hacking
