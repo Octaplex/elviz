@@ -16,7 +16,8 @@ There isn't an installer yet, so to run Elviz you'll have to clone this repo.
 The `bin/elviz` executable will import and run the `go` function in the `elviz`
 module. To run it, you can:
 
-- execute it directly in a shell
+- `make run`
+- execute it directly in a shell (need to set `$ELVIZ_PYTHON_PATH` manually)
 - open it in VIDLE and click `Run > Run Module`
 
 # Hacking

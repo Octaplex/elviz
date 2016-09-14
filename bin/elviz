@@ -1,7 +1,13 @@
 #!/usr/bin/python2
-import sys
-import os.path
-sys.path.append(os.path.abspath('..'))
+"""
+Find and run Elviz.
+Don't edit unless you know what you're doing!
+"""
+
+import sys, os
+elviz_path = os.environ.get("ELVIZ_PYTHON_PATH", '/usr/lib/elviz')
+if not elviz_path in sys.path:
+    sys.path.append(elviz_path)
 
 import elviz
 elviz.go()
