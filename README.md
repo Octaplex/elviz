@@ -13,26 +13,17 @@ There isn't an installer yet, so to run Elviz you'll have to clone this repo.
 
 # Running
 
-## On the command line
+The `bin/elviz` executable will import and run the `go` function in the `elviz`
+module. To run it, you can:
 
-1. Navigate to the `elviz` directory, wherever you cloned it.
-2. (*optional*) Modify the file `elviz.py` to your liking (see [hacking](#hacking)).
-3. Execute `python2 elviz.py` in a terminal (or whatever command your distro
-   uses for python 2).
-
-## In VIDLE
-
-VPython comes with a modification of Python's IDLE, called VIDLE, that can also
-be used to run Elviz:
-
-1. Open `elviz.py`, wherever you stored it.
-2. (*optional*) Modify the file to your liking (see [hacking](#hacking))
-3. Click `Run > Run Module` to launch the program.
+- execute it directly in a shell
+- open it in VIDLE and click `Run > Run Module`
 
 # Hacking
 
-The sample `elviz.py` contains some objects that you can play around with, but
-it's much more fun to make your own scene! Some tips:
+The `go` function in the file `elviz/__init__.py` is currently the main
+entrypoint. It contains some objects that you can play around with, but it's
+much more fun to make your own scene! Some tips:
 
 - You can change properties of the scene by editing the setup section; for
   example, you can change the color by editing the `BField` declaration (note:
